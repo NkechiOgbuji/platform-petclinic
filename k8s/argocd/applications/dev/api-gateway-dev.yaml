@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-gateway-dev
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "3"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: petclinic
+  source:
+    repoURL: https://github.com/Goodnessoj/petclinic-Infra.git
+    targetRevision: main
+    path: helm/petclinic-service
+    helm:
+      releaseName: api-gateway
+      valueFiles:
+        - ../../helm-values/dev.yaml
+        - ../../helm-values/api-gateway.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: petclinic-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PruneLast=true
