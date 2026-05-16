@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: discovery-server-prod
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: petclinic
+  source:
+    repoURL: https://github.com/Goodnessoj/petclinic-Infra.git
+    targetRevision: main
+    path: helm/petclinic-service
+    helm:
+      releaseName: discovery-server
+      valueFiles:
+        - ../../helm-values/prod.yaml
+        - ../../helm-values/discovery-server.yaml
+      parameters:
+        - name: image.registry
+          value: 974263620909.dkr.ecr.us-east-2.amazonaws.com
+        - name: image.repository
+          value: petclinic-prod-discovery-server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: petclinic-prod
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - PruneLast=true
