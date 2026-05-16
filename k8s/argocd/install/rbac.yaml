@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  labels:
+    app.kubernetes.io/name: argocd-rbac-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  policy.default: role:readonly
+  scopes: '[groups]'
+  policy.csv: |
+    p, role:developer, applications, get, petclinic/*, allow
+    p, role:developer, applications, sync, petclinic/*-dev, allow
+    p, role:developer, applications, action/*, petclinic/*-dev, allow
+    p, role:developer, logs, get, petclinic/*, allow
+    p, role:developer, projects, get, petclinic, allow
+    p, role:developer, repositories, get, *, allow
+
+    g, argocd-admins, role:admin
+    g, argocd-developers, role:developer
