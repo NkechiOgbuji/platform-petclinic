@@ -1,0 +1,39 @@
+environment: dev
+replicaCount: 1
+
+image:
+  registry: 974263620909.dkr.ecr.us-east-2.amazonaws.com
+  repositoryPrefix: petclinic-dev
+  tag: latest
+  pullPolicy: IfNotPresent
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 768Mi
+
+autoscaling:
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: null
+
+pdb:
+  minAvailable: 0
+
+monitoring:
+  podMonitor:
+    labels:
+      release: monitoring
+
+ingress:
+  scheme: internet-facing
+  targetType: ip
+  host: petclinic.phoniex.site
+  certificateArn: ""
+  albName: petclinic-dev
+  annotations:
+    alb.ingress.kubernetes.io/group.name: petclinic-dev

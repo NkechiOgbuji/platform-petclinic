@@ -1,0 +1,17 @@
+nameOverride: config-server
+
+image:
+  tag: "e5ae608"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8888
+  targetPort: 8888
+
+env:
+  SPRING_APPLICATION_NAME: config-server
+  SPRING_CLOUD_CONFIG_SERVER_GIT_URI: https://github.com/spring-petclinic/spring-petclinic-microservices-config
+  SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL: main
+
+pdb:
+  enabled: true

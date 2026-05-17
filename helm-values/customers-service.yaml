@@ -1,0 +1,37 @@
+nameOverride: customers-service
+
+image:
+  tag: "e5ae608"
+  pullPolicy: IfNotPresent
+
+service:
+  port: 8081
+  targetPort: 8081
+
+env:
+  SPRING_PROFILES_ACTIVE: docker
+  CONFIG_SERVER_URL: http://config-server:8888/
+  EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://discovery-server:8761/eureka/
+  MANAGEMENT_TRACING_EXPORT_ZIPKIN_ENDPOINT: http://zipkin.tracing:9411/api/v2/spans
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: http://zipkin.tracing:9411/api/v2/spans
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+  MANAGEMENT_METRICS_DISTRIBUTION_PERCENTILESHISTOGRAM_HTTP_SERVER_REQUESTS: "true"
+
+monitoring:
+  podMonitor:
+    enabled: true
+
+extraInitContainers:
+  - name: wait-for-config-server
+    image: busybox:1.36
+    command:
+      - sh
+      - -c
+      - |
+        until wget -q -T 2 -O- http://config-server:8888 >/dev/null 2>&1; do
+          echo "waiting for config-server"
+          sleep 5
+        done
+
+pdb:
+  enabled: true
