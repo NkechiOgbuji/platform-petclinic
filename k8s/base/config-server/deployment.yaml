@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: config-server
+  labels:
+    app.kubernetes.io/name: config-server
+    app.kubernetes.io/part-of: petclinic
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: config-server
+      app.kubernetes.io/part-of: petclinic
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: config-server
+        app.kubernetes.io/part-of: petclinic
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: config-server
+          image: petclinic/config-server:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8888
+          env:
+            - name: SPRING_APPLICATION_NAME
+              value: config-server
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_URI
+              value: https://github.com/spring-petclinic/spring-petclinic-microservices-config
+            - name: SPRING_CLOUD_CONFIG_SERVER_GIT_DEFAULT_LABEL
+              value: main
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 6
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: http
+            periodSeconds: 20
+            failureThreshold: 6
+          resources: {}
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
